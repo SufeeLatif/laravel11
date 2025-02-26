@@ -6,8 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\UserRoles;
 use App\Models\UserModule;
 use App\Models\UserAccessManages;
-use Session;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\Facades\DataTables;
+use Stevebauman\Location\Facades\Location;
+
+
+use Illuminate\Foundation\Validation\ValidatesRequests; // <-- This is the important one
 
 
 class UserRoleController extends Controller
@@ -22,9 +34,6 @@ class UserRoleController extends Controller
 
             $data = $request->all();
 
-//            echo "<PRE>";
-//            print_r($data);
-//            exit;
 
             if (!empty($data['access'])) {
                 UserAccessManages::where("user_role_id", $data['userID'])->delete();
@@ -50,9 +59,6 @@ class UserRoleController extends Controller
                 Session::flash("success_message", $message);
                 return redirect()->back();
 
-//                $message = "Choose any access please.";
-//                session::flash('error_message', $message);
-//                return redirect()->back();
             }
 
 
@@ -60,19 +66,11 @@ class UserRoleController extends Controller
 
 
         $UserRoles = UserRoles::find($id);
-//      $userRoles = UserRoles::where('id',$id)->first();
-
         $UserModule = UserModule::select('module_parent')->distinct()->get()->toArray();
-
-//        echo "<PRE>";print_r($UserModule);exit;
-
         $UserModule1 = UserModule::select('module_parent')->distinct()->get()->toArray();
-
         $UserModuleUnique = UserModule::distinct()->pluck('module_parent');
 
-//        echo "<PRE>";print_r($UserModuleUnique);exit;
-
-        return view('UserRole.userRoleAccess')->with(compact('UserRoles', 'UserModule', 'UserModule','UserModuleUnique'));
+        return view('UserRole.userRoleAccess')->with(compact('UserRoles', 'UserModule', 'UserModule', 'UserModuleUnique'));
 
 
     }
@@ -98,16 +96,7 @@ class UserRoleController extends Controller
 
 
             $data = $request->all();
-// //            echo "<PRE>";print_r($data);exit;
 
-//             $rules = array(
-//                 'title' => 'required|max:255',
-//             );
-
-
-//             $this->validate($request, $rules);
-
-// //            echo "<PRE>";print_r($data);exit;
 
             $validatedData = $request->validate([
                 'title' => 'required|max:255',
@@ -133,7 +122,7 @@ class UserRoleController extends Controller
             session::flash('success_message', $message);
             return redirect()->route('userRole');
         }
-        $UserRoles = UserRoles::orderby('id', 'desc')->where('id', '>', 2)->get()->toArray();
+        $UserRoles = UserRoles::orderby('id', 'desc')->where('deleted', 0)->where('id', '>', 2)->get()->toArray();
 
         return view('UserRole.index')->with(compact('UserRoles'));
     }
@@ -150,6 +139,45 @@ class UserRoleController extends Controller
         } else {
             return "true";
         }
+
+    }
+
+
+    /*deleteUserAjax*/
+    public function delete(Request $request, $id = null)
+    {
+
+        if ($request->isMethod('post')) {
+
+            $dataArr = $request->all();
+
+
+            $returnAffected = UserRoles::where('id', $dataArr['deleteId'])->update(['deleted' => 1, 'updated_by' => Auth::user()->id]);
+
+            if ($returnAffected === 0) {
+                $message = "Some Issue Occurs try later";
+                return response()->json(array(
+                    'status' => false,
+                    'message' => $message,
+                ));
+            }
+
+            $message = "Deleted successfully";
+
+            return response()->json(array(
+                'status' => true,
+                'message' => $message,
+                'returnAffected' => $returnAffected,
+            ));
+
+        } else {
+            $message = "Some Issue Occurs try later";
+            return response()->json(array(
+                'status' => false,
+                'message' => $message,
+            ));
+        }
+
 
     }
 }

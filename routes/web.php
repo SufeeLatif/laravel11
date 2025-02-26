@@ -52,12 +52,12 @@ Route::prefix('admin')->group(function () {
         Route::prefix('user-role')->group(function () {
 
             Route::match(array('get', 'post'), '/', array(UserRoleController::class, 'index'))->name('userRole');
-            Route::match(array('get', 'post'), '/create', array(UserRoleController::class, 'index'))->name('userRoleCreate');
-            Route::match(array('get', 'post'), '/update{id?}', array(UserRoleController::class, 'index'))->name('userRoleUpdate');
-            Route::match(array('get', 'post'), '/delete{id?}', array(UserRoleController::class, 'createUpdate'))->name('userRoleDelete');
-            Route::match(array('get', 'post'), '/status', array(UserRoleController::class, 'createUpdate'))->name('userRoleStatus');
-            Route::match(array('get', 'post'), '/userRoleAccess/{id?}', array(UserRoleController::class, 'userRoleAccess'))->name('userRoleAccess');
-            Route::match(array('get', 'post'), '/userCheckRole', array(UserRoleController::class, 'userCheckRole'))->name('userCheckRole');
+            Route::match(array('get', 'post'), 'create', array(UserRoleController::class, 'index'))->name('userRoleCreate');
+            Route::match(array('get', 'post'), 'update/{id?}', array(UserRoleController::class, 'index'))->name('userRoleUpdate');
+            Route::match(array('get', 'post'), 'delete/{id?}', array(UserRoleController::class, 'delete'))->name('userRoleDelete');
+            Route::match(array('get', 'post'), 'status', array(UserRoleController::class, 'createUpdate'))->name('userRoleStatus');
+            Route::match(array('get', 'post'), 'userRoleAccess/{id?}', array(UserRoleController::class, 'userRoleAccess'))->name('userRoleAccess');
+            Route::match(array('get', 'post'), 'userCheckRole', array(UserRoleController::class, 'userCheckRole'))->name('userCheckRole');
 
         });
 
