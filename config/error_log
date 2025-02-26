@@ -1,0 +1,4 @@
+[24-Jan-2025 19:10:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/sufeelatif/public_html/Projects/visualads/config/database.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/sufeelatif/public_html/Projects/visualads/config/database.php on line 19
