@@ -1,7 +1,16 @@
 @extends('layouts.master')
+
+@section('title')
+	{{ isset($user) && $user->id ? 'Update User' : 'Create User' }}
+@endsection
+
+
 @section('css')
 	<!-- INTERNAL Select2 css -->
 	<link href="{{ asset('assets/plugins/select2/select2.min.css') }}" rel="stylesheet" />
+
+	<!-- INTERNAL Notifications  Css -->
+	<link href="{{asset('assets/plugins/notify/css/jquery.growl.css')}}" rel="stylesheet" />
 
 	<style>
 		.widget-user-image {
@@ -67,8 +76,15 @@
 		<div class="page-leftheader">
 			<h4 class="page-title mb-0">User</h4>
 			<ol class="breadcrumb">
-				{{-- <li class="breadcrumb-item"><a href="#"><i class="fe fe-layers mr-2 fs-14"></i>Pages</a></li> --}}
-				{{-- <li class="breadcrumb-item active" aria-current="page"><a href="#">EditProfile</a></li> --}}
+				<li class="breadcrumb-item"><a href="#"><i class="fe fe-layers mr-2 fs-14"></i>Users</a></li>
+				<li class="breadcrumb-item active" aria-current="page"><a href="#">
+
+						@if(isset($user) && $user->id)
+							Update
+						@else
+							Create
+						@endif
+					</a></li>
 			</ol>
 		</div>
 		{{-- <div class="page-rightheader">
@@ -221,6 +237,25 @@
 								</div>
 							</div>
 
+							<!-- Gender Dropdown -->
+							<div class="col-sm-6 col-md-6">
+								<div class="form-group">
+									<label class="form-label" for="gender">Gender</label>
+									<select class="form-control" id="gender" name="gender" required>
+										<option value="">Select Gender</option>
+										<option value="0" @if(isset($user) && $user->gender == 0) selected @endif>Male
+										</option>
+										<option value="1" @if(isset($user) && $user->gender == 1) selected @endif>Female
+										</option>
+										<option value="2" @if(isset($user) && $user->gender == 2) selected @endif>Other
+										</option>
+									</select>
+									@error('gender')
+										<div class="text-danger">{{ $message }}</div>
+									@enderror
+								</div>
+							</div>
+
 
 						</div>
 
@@ -276,8 +311,10 @@
 
 					<!-- Form Footer with Buttons -->
 					<div class="card-footer text-right">
-						<button type="submit" class="btn btn-primary">Submit</button>
-						<a href="{{ route('userList') }}" class="btn btn-danger">Cancel</a>
+						<button type="submit" class="btn btn-primary">
+							@if(isset($user) && $user->id > 0) Update @else Create @endif
+						</button>
+						<!-- <a href="{{ route('userList') }}" class="btn btn-danger">Cancel</a> -->
 					</div>
 				</form>
 
@@ -311,24 +348,24 @@
 
 		$("#userForm").validate({
 
-			submitHandler: function (form) {
-			$("#userForm button[type='submit']").attr("disabled", true);
-			$("#userForm button[type='submit']").html("<i class='fa fa-refresh fa-spin'></i>&nbsp;Process....");
-			form.submit();
-			},
+		submitHandler: function (form) {
+		$("#userForm button[type='submit']").attr("disabled", true);
+		$("#userForm button[type='submit']").html("<i class='fa fa-refresh fa-spin'></i>&nbsp;Process....");
+		form.submit();
+		},
 
 
-			errorElement: 'span',
-			errorPlacement: function (error, element) {
-			error.addClass('invalid-feedback');
-			element.closest('.form-group').append(error);
-			},
-			highlight: function (element, errorClass, validClass) {
-			$(element).addClass('is-invalid');
-			},
-			unhighlight: function (element, errorClass, validClass) {
-			$(element).removeClass('is-invalid');
-			}
+		errorElement: 'span',
+		errorPlacement: function (error, element) {
+		error.addClass('invalid-feedback');
+		element.closest('.form-group').append(error);
+		},
+		highlight: function (element, errorClass, validClass) {
+		$(element).addClass('is-invalid');
+		},
+		unhighlight: function (element, errorClass, validClass) {
+		$(element).removeClass('is-invalid');
+		}
 
 		});
 

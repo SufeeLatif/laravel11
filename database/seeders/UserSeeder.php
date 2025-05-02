@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
                 'first_name' => 'Super',
                 'last_name' => 'Admin',
                 'name' => 'super-admin',
-                'user_type' => 2,
+                'user_type' => 1,
                 'mobile' => '+923242193100',
                 'email' => 'admin@admin.com',
                 'password' => bcrypt(123456),

@@ -24,6 +24,8 @@ class UserController extends Controller
 
     use ValidatesRequests;  // Add this line
 
+    
+
     /* toggleTheme */
     public function toggleTheme(Request $request)
     {
@@ -80,6 +82,7 @@ class UserController extends Controller
             $user->first_name = $data['first_name'];
             $user->last_name = $data['last_name'];
             $user->user_type = $data['user_role'];
+            $user->gender = $data['gender'];
 
             if ($id == "") {
                 $user->email = $data['email'];
@@ -132,13 +135,19 @@ class UserController extends Controller
             }
 
 
+            if ($user->exists) {
+                $user->updated_by = Auth::id();
+            } else {
+                $user->created_by = Auth::id();
+            }
+
             $user->save();
 
             // Redirect with a success message
             return redirect()->route('userList')->with('success_message', $message);
         }
 
-        $UserRoles = UserRoles::orderby('id', 'desc')->where('id', '>', 2)->get()->toArray();
+        $UserRoles = UserRoles::orderby('id', 'desc')->where('id', '>', 1)->get()->toArray();
 
         // Return the view with data (if editing, send the user data)
         return view('User.createUpdate', compact('user', 'UserRoles'));
@@ -171,11 +180,51 @@ class UserController extends Controller
     public function listDatatable()
     {
 
-        $data = User::with('user_roles')->orderBy('id', 'desc')->where('user_type', '>', 2)->where('deleted', 0);
-        $data = $data->get()->toArray();
+        $UserRoles =  UserRoles::pluck('title', 'id')->where('deleted',0)->toArray(); 
+
+        $defaultImage = asset('default-img/user.png'); // Default profile image
+
+        $data = User::with('user_roles')->orderBy('id', 'desc')->where('user_type', '>', 1)->where('deleted', 0);
+        $data = $data->get();
+
+        $data->map(function ($row) use ($defaultImage) {
+            // Check if user image exists
+            $imagePath = 'uploads/profile_img/' . $row->image;
+            if (empty($row->image) || !file_exists(public_path($imagePath))) {
+                $row->image = $defaultImage; // Assign default image if missing or file not found
+            } else {
+                $row->image = asset($imagePath); // Use actual image if exists
+            }
+        
+            // Combine image and full name
+            $row->image_full_name = '
+                <div class="d-flex align-items-center">
+                    <img src="' . $row->image . '" class="rounded-circle" width="40" height="40" style="object-fit: cover; margin-right: 10px;">
+                    <span>' . htmlspecialchars($row->first_name . ' ' . $row->last_name, ENT_QUOTES, 'UTF-8') . '</span>
+                </div>';
+        
+            return $row;
+        });
 
         return Datatables::of($data)
             ->addIndexColumn()
+            
+            ->addColumn('user_type', function ($row) use ($UserRoles) {
+                $roleTitle = $UserRoles[$row->user_type] ?? 'Unknown';
+    
+                // Dynamically assign badge color (Optional: can be made dynamic too)
+                $badgeColors = [
+                    1 => 'success', // Super Admin → Green
+                    2 => 'primary', // Data Entry Operator → Blue
+                    // Add more if you want different colors per role id
+                ];
+    
+                $badgeColor = $badgeColors[$row->user_type] ?? 'secondary'; // Default gray
+    
+                return '<span class="badge badge-' . $badgeColor . '">' . htmlspecialchars($roleTitle, ENT_QUOTES, 'UTF-8') . '</span>';
+            })
+
+            
             ->addColumn('status', function ($row) {
                 // Check if the status is active (1) or not (0)
                 $statusChecked = $row['status'] == 1 ? 'checked' : '';
@@ -211,7 +260,7 @@ class UserController extends Controller
 
                 return $btn;
             })
-            ->rawColumns(['action', 'status'])
+            ->rawColumns(['action', 'status','image_full_name','user_type'])
             ->make(true);
 
 
@@ -407,7 +456,7 @@ class UserController extends Controller
             $user->first_name = $firstName;
             $user->last_name = $lastName;
             $user->name = $slug;
-            $user->user_type = 3;
+            $user->user_type = 2;
             $user->email = trim($request->email);  // Clean the email input
             $user->password = Hash::make($request->password);  // Securely hash the password
             $user->unique_in = Str::lower(implode('-', str_split(Str::random(16), 4)));

@@ -1,4 +1,9 @@
 @extends('layouts.master')
+
+@section('title')
+    Users
+@endsection
+
 @section('css')
     <!-- Data table css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
@@ -74,8 +79,9 @@
                             <thead>
                                 <tr>
                                     <th class="wd-15p border-bottom-0">#</th>
-                                    <th class="wd-15p border-bottom-0">Name</th>
+                                    <th class="wd-15p border-bottom-0">Full Name</th>
                                     <th class="wd-15p border-bottom-0">Email</th>
+                                    <th class="wd-15p border-bottom-0">Role</th>
                                     <th class="wd-15p border-bottom-0">Status</th>
                                     <th class="wd-15p border-bottom-0">Action</th>
 
@@ -133,7 +139,18 @@
     <script src="{{ asset('assets/plugins/sweet-alert/sweetalert.min.js') }}"></script>
 
     <script>
+
         $(document).ready(function () {
+
+
+            // Every 2 seconds, remove 'parent' class from all <tr> elements
+            setInterval(function () {
+                $('tr').removeClass('parent');
+                console.log('Removed "parent" class from all <tr> elements');
+            }, 2000); // 2000 milliseconds = 2 seconds
+
+
+
             $('#usertable').DataTable({
                 responsive: true,
                 language: {
@@ -151,8 +168,11 @@
                         render: function (data, type, row, meta) {
                             return meta.row + 1; // Row number (index + 1)
                         }
-                    }, { data: 'name', name: 'name' },
+                    },
+                    { data: 'image_full_name', name: 'image_full_name' },
+                    // { data: 'name', name: 'name' },
                     { data: 'email', name: 'email' },
+                    { data: 'user_type', name: 'user_type' },
                     { data: 'status', name: 'status' },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],
@@ -282,14 +302,6 @@
         });
 
 
-
-
-
-
-
-    </script>
-
-    <script>
         $(document).ready(function () {
 
             @if (session('success_message'))
@@ -306,7 +318,7 @@
                 });
             @endif
 
-        });
+            });
     </script>
 
 @endsection

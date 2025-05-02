@@ -20,7 +20,10 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('name'); 
+            $table->enum('gender', ['0', '1', '2'])
+                  ->comment('User gender: 0 = male, 1 = female, 2 = other');
             $table->string('email')->unique(); 
+            
             $table->integer('user_type')->default(1)->nullable();
             $table->string('mobile')->nullable();
             $table->string('image')->default('default-user.jpg');
@@ -39,6 +42,7 @@ return new class extends Migration
             $table->longText('about_user')->nullable();
 
             $table->tinyInteger('theme')->default(0);
+          
             $table->tinyInteger('status')->default('0')->comment('0=deactive,1=active');
             $table->tinyInteger('deleted')->default('0')->comment('0=not deleted,1=deleted');
             $table->integer('deleted_by')->default('0');
