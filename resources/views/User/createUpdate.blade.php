@@ -209,7 +209,7 @@
 							<div class="col-sm-6 col-md-6">
 								<div class="form-group">
 									<label class="form-label" for="mobile">Mobile </label>
-									<input type="number" class="form-control" id="mobile" name="mobile"
+									<input type="text" class="form-control" id="mobile" name="mobile"
 										placeholder="Mobile Number" value="{{ $user['mobile'] ?? old('mobile') }}" required>
 									@error('mobile')
 										<div class="text-danger">{{ $message }}</div>
@@ -342,84 +342,110 @@
 	<script src="{{asset('assets/jquery-validation/additional-methods.min.js')}}"></script>
 
 
-	<<script>
+	<script>
 		$(document).ready(function () {
 
 
-		$("#userForm").validate({
 
-		submitHandler: function (form) {
-		$("#userForm button[type='submit']").attr("disabled", true);
-		$("#userForm button[type='submit']").html("<i class='fa fa-refresh fa-spin'></i>&nbsp;Process....");
-		form.submit();
-		},
+			// Mobile number formatting: 92-324-2193100
+			$('#mobile').on('input', function () {
+				var value = $(this).val();
 
+				// Remove all non-numeric characters
+				value = value.replace(/\D/g, '');
 
-		errorElement: 'span',
-		errorPlacement: function (error, element) {
-		error.addClass('invalid-feedback');
-		element.closest('.form-group').append(error);
-		},
-		highlight: function (element, errorClass, validClass) {
-		$(element).addClass('is-invalid');
-		},
-		unhighlight: function (element, errorClass, validClass) {
-		$(element).removeClass('is-invalid');
-		}
+				// Ensure the number starts with '92' (country code)
+				if (value.length > 0 && value[0] !== '9') {
+					value = '92' + value.slice(1);
+				}
 
-		});
+				// Format the mobile number as 92-324-2193100
+				if (value.length > 2) {
+					value = value.slice(0, 2) + '-' + value.slice(2);
+				}
+				if (value.length > 6) {
+					value = value.slice(0, 6) + '-' + value.slice(6, 13);
+				}
 
-
-
-		@if (session('success_message'))
-			$.growl.notice({
-			title: "Success",
-			message: "{{ session('success_message') }}" // Wrapped in quotes
+				// Update the input field with the formatted value
+				$(this).val(value);
 			});
-		@endif
 
-		@if (session('error_message'))
-			$.growl.error({
-			title: "Error",
-			message: "{{ session('error_message') }}" // Wrapped in quotes
+
+			$("#userForm").validate({
+
+				submitHandler: function (form) {
+					$("#userForm button[type='submit']").attr("disabled", true);
+					$("#userForm button[type='submit']").html("<i class='fa fa-refresh fa-spin'></i>&nbsp;Process....");
+					form.submit();
+				},
+
+
+				errorElement: 'span',
+				errorPlacement: function (error, element) {
+					error.addClass('invalid-feedback');
+					element.closest('.form-group').append(error);
+				},
+				highlight: function (element, errorClass, validClass) {
+					$(element).addClass('is-invalid');
+				},
+				unhighlight: function (element, errorClass, validClass) {
+					$(element).removeClass('is-invalid');
+				}
+
 			});
-		@endif
 
 
-		});
+
+			@if (session('success_message'))
+				$.growl.notice({
+					title: "Success",
+					message: "{{ session('success_message') }}" // Wrapped in quotes
+				});
+			@endif
+
+			@if (session('error_message'))
+				$.growl.error({
+					title: "Error",
+					message: "{{ session('error_message') }}" // Wrapped in quotes
+				});
+			@endif
+
+
+				});
 
 
 		function togglePassword(id) {
-		var passwordField = document.getElementById(id);
-		var eyeIcon = document.getElementById('eye-' + id);
+			var passwordField = document.getElementById(id);
+			var eyeIcon = document.getElementById('eye-' + id);
 
-		if (passwordField.type === "password") {
-		passwordField.type = "text";
-		eyeIcon.classList.remove("fa-eye");
-		eyeIcon.classList.add("fa-eye-slash");
-		} else {
-		passwordField.type = "password";
-		eyeIcon.classList.remove("fa-eye-slash");
-		eyeIcon.classList.add("fa-eye");
-		}
+			if (passwordField.type === "password") {
+				passwordField.type = "text";
+				eyeIcon.classList.remove("fa-eye");
+				eyeIcon.classList.add("fa-eye-slash");
+			} else {
+				passwordField.type = "password";
+				eyeIcon.classList.remove("fa-eye-slash");
+				eyeIcon.classList.add("fa-eye");
+			}
 		}
 
 
 		function previewImage(event) {
-		// Get the file input and the preview image element
-		var reader = new FileReader();
-		var avatarPreview = document.getElementById('avatarPreview');
+			// Get the file input and the preview image element
+			var reader = new FileReader();
+			var avatarPreview = document.getElementById('avatarPreview');
 
-		// When the file is read successfully, set the src of the preview image
-		reader.onload = function() {
-		avatarPreview.src = reader.result;
-		};
+			// When the file is read successfully, set the src of the preview image
+			reader.onload = function () {
+				avatarPreview.src = reader.result;
+			};
 
-		// Read the selected file as a Data URL (base64)
-		if (event.target.files[0]) {
-		reader.readAsDataURL(event.target.files[0]);
+			// Read the selected file as a Data URL (base64)
+			if (event.target.files[0]) {
+				reader.readAsDataURL(event.target.files[0]);
+			}
 		}
-		}
-		</script>
+	</script>
 
 @endsection
